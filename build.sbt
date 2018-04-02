@@ -6,7 +6,7 @@ lazy val root = Project(buildName, file("."))
     name          := buildName,
     organization  := buildOrganization,
     version       := "1.1.4-SNAPSHOT",
-    scalaVersion  := "2.11.8",
+    scalaVersion  := "2.12.5",
     crossPaths    := false,
     javaOptions   ++= Seq (
       "-target", "1.8"

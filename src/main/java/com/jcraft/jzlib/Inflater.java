@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -34,28 +34,28 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.jcraft.jzlib;
 
-final public class Inflater extends ZStream{
+final public class Inflater extends ZStream {
 
-  static final private int MAX_WBITS=15;        // 32K LZ77 window
-  static final private int DEF_WBITS=MAX_WBITS;
+  static final private int MAX_WBITS = 15;        // 32K LZ77 window
+  static final private int DEF_WBITS = MAX_WBITS;
 
-  static final private int Z_NO_FLUSH=0;
-  static final private int Z_PARTIAL_FLUSH=1;
-  static final private int Z_SYNC_FLUSH=2;
-  static final private int Z_FULL_FLUSH=3;
-  static final private int Z_FINISH=4;
+  static final private int Z_NO_FLUSH = 0;
+  static final private int Z_PARTIAL_FLUSH = 1;
+  static final private int Z_SYNC_FLUSH = 2;
+  static final private int Z_FULL_FLUSH = 3;
+  static final private int Z_FINISH = 4;
 
-  static final private int MAX_MEM_LEVEL=9;
+  static final private int MAX_MEM_LEVEL = 9;
 
-  static final private int Z_OK=0;
-  static final private int Z_STREAM_END=1;
-  static final private int Z_NEED_DICT=2;
-  static final private int Z_ERRNO=-1;
-  static final private int Z_STREAM_ERROR=-2;
-  static final private int Z_DATA_ERROR=-3;
-  static final private int Z_MEM_ERROR=-4;
-  static final private int Z_BUF_ERROR=-5;
-  static final private int Z_VERSION_ERROR=-6;
+  static final private int Z_OK = 0;
+  static final private int Z_STREAM_END = 1;
+  static final private int Z_NEED_DICT = 2;
+  static final private int Z_ERRNO = -1;
+  static final private int Z_STREAM_ERROR = -2;
+  static final private int Z_DATA_ERROR = -3;
+  static final private int Z_MEM_ERROR = -4;
+  static final private int Z_BUF_ERROR = -5;
+  static final private int Z_VERSION_ERROR = -6;
 
   private int param_w = -1;
   private JZlib.WrapperType param_wrapperType = null;
@@ -75,8 +75,8 @@ final public class Inflater extends ZStream{
     param_w = w;
     param_wrapperType = wrapperType;
     int ret = init(w, wrapperType);
-    if(ret!=Z_OK)
-      throw new GZIPException(ret+": "+msg);
+    if (ret != Z_OK)
+      throw new GZIPException(ret + ": " + msg);
   }
 
   public Inflater(int w) throws GZIPException {
@@ -92,95 +92,91 @@ final public class Inflater extends ZStream{
     param_w = w;
     param_nowrap = nowrap;
     int ret = init(w, nowrap);
-    if(ret!=Z_OK)
-      throw new GZIPException(ret+": "+msg);
+    if (ret != Z_OK)
+      throw new GZIPException(ret + ": " + msg);
   }
 
   void reset() {
     finished = false;
-    if(param_wrapperType != null){
+    if (param_wrapperType != null) {
       init(param_w, param_wrapperType);
-    }
-    else {
+    } else {
       init(param_w, param_nowrap);
     }
   }
 
   private boolean finished = false;
 
-  public int init(){
+  public int init() {
     return init(DEF_WBITS);
   }
 
-  public int init(JZlib.WrapperType wrapperType){
+  public int init(JZlib.WrapperType wrapperType) {
     return init(DEF_WBITS, wrapperType);
   }
 
   public int init(int w, JZlib.WrapperType wrapperType) {
     boolean nowrap = false;
-    if(wrapperType == JZlib.W_NONE){
+    if (wrapperType == JZlib.W_NONE) {
       nowrap = true;
-    }
-    else if(wrapperType == JZlib.W_GZIP) {
+    } else if (wrapperType == JZlib.W_GZIP) {
       w += 16;
-    }
-    else if(wrapperType == JZlib.W_ANY) {
+    } else if (wrapperType == JZlib.W_ANY) {
       w |= Inflate.INFLATE_ANY;
-    }
-    else if(wrapperType == JZlib.W_ZLIB) {
+    } else if (wrapperType == JZlib.W_ZLIB) {
     }
     return init(w, nowrap);
   }
 
-  public int init(boolean nowrap){
+  public int init(boolean nowrap) {
     return init(DEF_WBITS, nowrap);
   }
 
-  public int init(int w){
+  public int init(int w) {
     return init(w, false);
   }
 
-  public int init(int w, boolean nowrap){
+  public int init(int w, boolean nowrap) {
     finished = false;
-    istate=new Inflate(this);
-    return istate.inflateInit(nowrap?-w:w);
+    istate = new Inflate(this);
+    return istate.inflateInit(nowrap ? -w : w);
   }
 
-  public int inflate(int f){
-    if(istate==null) return Z_STREAM_ERROR;
+  public int inflate(int f) {
+    if (istate == null) return Z_STREAM_ERROR;
     int ret = istate.inflate(f);
-    if(ret == Z_STREAM_END) 
+    if (ret == Z_STREAM_END)
       finished = true;
     return ret;
   }
 
-  public int end(){
+  public int end() {
     finished = true;
-    if(istate==null) return Z_STREAM_ERROR;
-    int ret=istate.inflateEnd();
+    if (istate == null) return Z_STREAM_ERROR;
+    int ret = istate.inflateEnd();
 //    istate = null;
     return ret;
   }
 
-  public int sync(){
-    if(istate == null)
+  public int sync() {
+    if (istate == null)
       return Z_STREAM_ERROR;
     return istate.inflateSync();
   }
 
-  public int syncPoint(){
-    if(istate == null)
+  public int syncPoint() {
+    if (istate == null)
       return Z_STREAM_ERROR;
     return istate.inflateSyncPoint();
   }
 
-  public int setDictionary(byte[] dictionary, int dictLength){
-    if(istate == null)
+  public int setDictionary(byte[] dictionary, int dictLength) {
+    if (istate == null)
       return Z_STREAM_ERROR;
     return istate.inflateSetDictionary(dictionary, dictLength);
   }
 
-  public boolean finished(){
-    return istate.mode==12 /*DONE*/;
+  public boolean finished() {
+    return istate.mode == 12 /*DONE*/;
   }
 }

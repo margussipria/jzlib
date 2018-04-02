@@ -34,17 +34,17 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 package com.jcraft.jzlib;
 
-final class StaticTree{
-  static final private int MAX_BITS=15;
+final class StaticTree {
+  static final private int MAX_BITS = 15;
 
-  static final private int BL_CODES=19;
-  static final private int D_CODES=30;
-  static final private int LITERALS=256;
-  static final private int LENGTH_CODES=29;
-  static final private int L_CODES=(LITERALS+1+LENGTH_CODES);
+  static final private int BL_CODES = 19;
+  static final private int D_CODES = 30;
+  static final private int LITERALS = 256;
+  static final private int LENGTH_CODES = 29;
+  static final private int L_CODES = (LITERALS + 1 + LENGTH_CODES);
 
   // Bit length codes must not exceed MAX_BL_BITS bits
-  static final int MAX_BL_BITS=7; 
+  static final int MAX_BL_BITS = 7;
 
   static final short[] static_ltree = {
     12,  8, 140,  8,  76,  8, 204,  8,  44,  8,
@@ -118,15 +118,13 @@ final class StaticTree{
 
   static StaticTree static_l_desc =
     new StaticTree(static_ltree, Tree.extra_lbits,
-		   LITERALS+1, L_CODES, MAX_BITS);
+      LITERALS + 1, L_CODES, MAX_BITS);
 
   static StaticTree static_d_desc =
     new StaticTree(static_dtree, Tree.extra_dbits,
-		   0,  D_CODES, MAX_BITS);
+      0, D_CODES, MAX_BITS);
 
-  static StaticTree static_bl_desc =
-    new StaticTree(null, Tree.extra_blbits,
-		   0, BL_CODES, MAX_BL_BITS);
+  static StaticTree static_bl_desc = new StaticTree(null, Tree.extra_blbits,0, BL_CODES, MAX_BL_BITS);
 
   short[] static_tree;     // static tree or null
   int[] extra_bits;        // extra bits for each code or null
@@ -134,15 +132,17 @@ final class StaticTree{
   int elems;               // max number of elements in the tree
   int max_length;          // max bit length for the codes
 
-  private StaticTree(short[] static_tree,
-                     int[] extra_bits,
-                     int extra_base,
-                     int elems,
-                     int max_length){
-    this.static_tree=static_tree;
-    this.extra_bits=extra_bits;
-    this.extra_base=extra_base;
-    this.elems=elems;
-    this.max_length=max_length;
+  private StaticTree(
+    short[] static_tree,
+    int[] extra_bits,
+    int extra_base,
+    int elems,
+    int max_length
+  ) {
+    this.static_tree = static_tree;
+    this.extra_bits = extra_bits;
+    this.extra_base = extra_base;
+    this.elems = elems;
+    this.max_length = max_length;
   }
 }

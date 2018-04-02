@@ -8,8 +8,8 @@ modification, are permitted provided that the following conditions are met:
   1. Redistributions of source code must retain the above copyright notice,
      this list of conditions and the following disclaimer.
 
-  2. Redistributions in binary form must reproduce the above copyright 
-     notice, this list of conditions and the following disclaimer in 
+  2. Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the distribution.
 
   3. The names of the authors may not be used to endorse or promote products
@@ -28,7 +28,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 package com.jcraft.jzlib;
-import java.io.*;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 public class GZIPInputStream extends InflaterInputStream {
 
@@ -39,11 +41,11 @@ public class GZIPInputStream extends InflaterInputStream {
   public GZIPInputStream(InputStream in,
                          int size,
                          boolean close_in) throws IOException {
-    this(in, new Inflater(15+16), size, close_in);
+    this(in, new Inflater(15 + 16), size, close_in);
     myinflater = true;
   }
 
-  public GZIPInputStream(InputStream in, 
+  public GZIPInputStream(InputStream in,
                          Inflater inflater,
                          int size,
                          boolean close_in) throws IOException {
@@ -52,26 +54,26 @@ public class GZIPInputStream extends InflaterInputStream {
 
   public int read(byte[] b, int off, int len) throws IOException {
     int i = super.read(b, off, len);
-    if(i == -1){
-      if(inflater.avail_in<2){
+    if (i == -1) {
+      if (inflater.avail_in < 2) {
         int l = in.read(buf, 0, buf.length);
-        if(l>0)
+        if (l > 0)
           inflater.setInput(buf, 0, l, true);
       }
-      if(inflater.avail_in>2 &&
-         ((inflater.next_in[inflater.next_in_index]&0xff) == 0x1f) &&
-         ((inflater.next_in[inflater.next_in_index+1]&0xff) == (0x8b&0xff))){
+      if (inflater.avail_in > 2 &&
+        ((inflater.next_in[inflater.next_in_index] & 0xff) == 0x1f) &&
+        ((inflater.next_in[inflater.next_in_index + 1] & 0xff) == (0x8b & 0xff))) {
         this.inflater.reset();
-        this.eof=false;
+        this.eof = false;
         return super.read(b, off, len);
       }
-    } 
+    }
     return i;
   }
 
   /**
-   * @deprecated use getModifiedTime()
    * @return long modified time.
+   * @deprecated use getModifiedTime()
    */
   public long getModifiedtime() {
     return this.getModifiedTime();
@@ -97,7 +99,7 @@ public class GZIPInputStream extends InflaterInputStream {
   }
 
   public long getCRC() throws GZIPException {
-    if(inflater.istate.mode != 12 /*DONE*/)
+    if (inflater.istate.mode != 12 /*DONE*/)
       throw new GZIPException("checksum is not calculated yet.");
     return inflater.istate.getGZIPHeader().getCRC();
   }
@@ -111,8 +113,8 @@ public class GZIPInputStream extends InflaterInputStream {
     byte[] b = new byte[10];
 
     int n = fill(b);
-    if(n!=10){
-      if(n>0){
+    if (n != 10) {
+      if (n > 0) {
         inflater.setInput(b, 0, n, false);
         //inflater.next_in_index = n;
         inflater.next_in_index = 0;
@@ -124,22 +126,22 @@ public class GZIPInputStream extends InflaterInputStream {
     inflater.setInput(b, 0, n, false);
 
     byte[] b1 = new byte[1];
-    do{
-      if(inflater.avail_in<=0){
+    do {
+      if (inflater.avail_in <= 0) {
         int i = in.read(b1);
-        if(i<=0)
+        if (i <= 0)
           throw new IOException("no input");
         inflater.setInput(b1, 0, 1, true);
       }
 
       int err = inflater.inflate(JZlib.Z_NO_FLUSH);
 
-      if(err!=0/*Z_OK*/){
-        int len = 2048-inflater.next_in.length;
-        if(len>0){
+      if (err != 0/*Z_OK*/) {
+        int len = 2048 - inflater.next_in.length;
+        if (len > 0) {
           byte[] tmp = new byte[len];
           n = fill(tmp);
-          if(n>0){
+          if (n > 0) {
             inflater.avail_in += inflater.next_in_index;
             inflater.next_in_index = 0;
             inflater.setInput(tmp, 0, n, true);
@@ -151,25 +153,24 @@ public class GZIPInputStream extends InflaterInputStream {
         throw new IOException(inflater.msg);
       }
     }
-    while(inflater.istate.inParsingHeader());
+    while (inflater.istate.inParsingHeader());
   }
 
   private int fill(byte[] buf) {
     int len = buf.length;
     int n = 0;
-    do{
+    do {
       int i = -1;
       try {
         i = in.read(buf, n, buf.length - n);
+      } catch (IOException e) {
       }
-      catch(IOException e){
-      }
-      if(i == -1){
+      if (i == -1) {
         break;
       }
-      n+=i;
+      n += i;
     }
-    while(n<len);
+    while (n < len);
     return n;
   }
 }

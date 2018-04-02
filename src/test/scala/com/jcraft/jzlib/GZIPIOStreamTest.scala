@@ -1,18 +1,12 @@
 /* -*-mode:scala; c-basic-offset:2; indent-tabs-mode:nil -*- */
 package com.jcraft.jzlib
 
-import org.scalatest._
-import org.scalatest.matchers.ShouldMatchers
-
 import java.io._
-import java.util.zip.CheckedOutputStream
-import java.util.zip.CheckedInputStream
-import java.util.zip.{GZIPInputStream => juzGZIPInputStream}
-import java.util.zip.{CRC32 => juzCRC32}
+import java.util.zip.{CheckedInputStream, CheckedOutputStream, CRC32 => juzCRC32, GZIPInputStream => juzGZIPInputStream}
 
-import JZlib._
+import org.scalatest._
 
-class GZIPIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
+class GZIPIOStreamTest extends FlatSpec with BeforeAndAfter with Matchers {
 
   before {
   }
@@ -38,7 +32,7 @@ class GZIPIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers 
     gos.setModifiedTime(time)
  
     gos.write(content)
-    gos.close
+    gos.close()
 
     val bais = new ByteArrayInputStream(baos.toByteArray)
     val gis = new GZIPInputStream(bais)
@@ -73,22 +67,22 @@ class GZIPIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers 
     val cos = new CheckedOutputStream(gos, csOut)
 
     val t = new Thread() {
-      override def run = {
+      override def run(): Unit = {
         val fail = "/jzlib.fail.gz".fromResource
         val fis = new juzGZIPInputStream(new ByteArrayInputStream(fail))
         fis -> cos
         cos.close()
       }
     }
-    t.start();
+    t.start()
 
     val gis = new GZIPInputStream(pis)
-    val csIn = new juzCRC32();
+    val csIn = new juzCRC32()
     new CheckedInputStream(gis, csIn) -> new ByteArrayOutputStream()
 
     t.join()
 
-    csIn.getValue() should equal(csOut.getValue)
+    csIn.getValue should equal(csOut.getValue)
   }
 
   behavior of "GZIPInputStream"
@@ -99,10 +93,10 @@ class GZIPIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers 
     // echo -n "c" | gzip >> data
     val data =  {
      val baos1 = new ByteArrayOutputStream
-      List("a", "b", "c").map{s =>
+      List("a", "b", "c").foreach { s =>
         val gos = new GZIPOutputStream(baos1)
-        gos.write(s.getBytes);
-        gos.close
+        gos.write(s.getBytes)
+        gos.close()
       }
       baos1.toByteArray
     }

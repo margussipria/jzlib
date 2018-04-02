@@ -1,16 +1,12 @@
 /* -*-mode:scala; c-basic-offset:2; indent-tabs-mode:nil -*- */
 package com.jcraft.jzlib
 
+import java.io.{ByteArrayInputStream => BAIS, ByteArrayOutputStream => BAOS, ObjectInputStream => OIS, ObjectOutputStream => OOS}
+
+import com.jcraft.jzlib.JZlib._
 import org.scalatest._
-import org.scalatest.matchers.ShouldMatchers
 
-import java.io.{ByteArrayOutputStream => BAOS, ByteArrayInputStream => BAIS}
-import java.io.{ObjectOutputStream => OOS, ObjectInputStream => OIS}
-import java.io._
-
-import JZlib._
-
-class ZIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
+class ZIOStreamTest extends FlatSpec with BeforeAndAfter with Matchers {
 
   before {
   }
@@ -27,9 +23,9 @@ class ZIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
     val zOut = new ZOutputStream(out, Z_BEST_COMPRESSION)
     val objOut = new OOS(zOut)
     objOut.writeObject(hello)
-    zOut.close
+    zOut.close()
 
-    val in = new BAIS(out.toByteArray())
+    val in = new BAIS(out.toByteArray)
     val zIn = new ZInputStream(in)
     val objIn = new OIS(zIn)
 
@@ -40,14 +36,14 @@ class ZIOStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
 
   it can "support nowrap data." in {
 
-    implicit val buf = new Array[Byte](100)
+    implicit val buf: Array[Byte] = new Array[Byte](100)
 
     val hello = "Hello World!".getBytes
 
     val baos = new BAOS
     val zos = new ZOutputStream(baos, Z_DEFAULT_COMPRESSION, true)
     hello -> zos
-    zos.close
+    zos.close()
 
     val baos2 = new BAOS
     val zis = new ZInputStream(new BAIS(baos.toByteArray), true)

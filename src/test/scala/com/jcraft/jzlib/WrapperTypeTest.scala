@@ -1,14 +1,12 @@
 /* -*-mode:scala; c-basic-offset:2; indent-tabs-mode:nil -*- */
 package com.jcraft.jzlib
 
+import java.io.{ByteArrayInputStream => BAIS, ByteArrayOutputStream => BAOS}
+
+import com.jcraft.jzlib.JZlib._
 import org.scalatest._
-import org.scalatest.matchers.ShouldMatchers
 
-import java.io.{ByteArrayOutputStream => BAOS, ByteArrayInputStream => BAIS}
-
-import JZlib._
-
-class WrapperTypeTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
+class WrapperTypeTest extends FlatSpec with BeforeAndAfter with Matchers {
   val data = "hello, hello!".getBytes
 
   val comprLen = 40000
@@ -35,14 +33,14 @@ class WrapperTypeTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
   behavior of "Deflater"
 
   it can "detect data type of input." in {
-    implicit val buf = compr
+    implicit val buf: Array[Byte] = compr
 
     cases foreach { case (iflag, (good, bad)) => 
       val baos = new BAOS
       val deflater = new Deflater(Z_DEFAULT_COMPRESSION, DEF_WBITS, 9, iflag)
       val gos = new DeflaterOutputStream(baos, deflater)
       data -> gos
-      gos.close
+      gos.close()
 
       val deflated = baos.toByteArray
 
@@ -183,9 +181,7 @@ class WrapperTypeTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
     inflater
   }
 
-  private def inflate_fail(compr: Array[Byte],
-                           uncompr: Array[Byte],
-                           w: WrapperType) = {
+  private def inflate_fail(compr: Array[Byte], uncompr: Array[Byte], w: WrapperType): Unit = {
     val inflater = new ZStream
 
     err = inflater.inflateInit(w)

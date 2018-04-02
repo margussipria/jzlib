@@ -1,12 +1,10 @@
 /* -*-mode:scala; c-basic-offset:2; indent-tabs-mode:nil -*- */
 package com.jcraft.jzlib
 
+import com.jcraft.jzlib.JZlib._
 import org.scalatest._
-import org.scalatest.matchers.ShouldMatchers
 
-import JZlib._
-
-class DeflateInflateTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
+class DeflateInflateTest extends FlatSpec with BeforeAndAfter with Matchers {
   val comprLen = 40000
   val uncomprLen = comprLen
   var compr:Array[Byte] = _
@@ -302,7 +300,7 @@ class DeflateInflateTest extends FlatSpec with BeforeAndAfter with ShouldMatcher
       deflater.avail_out = 1
       err = deflater.deflate(Z_FINISH)
     }
-    while(err != Z_STREAM_END);
+    while(err != Z_STREAM_END)
 
     err = deflater.end
     err should equal (Z_OK)

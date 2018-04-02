@@ -1,14 +1,11 @@
 /* -*-mode:scala; c-basic-offset:2; indent-tabs-mode:nil -*- */
 package com.jcraft.jzlib
 
+import java.io.{ByteArrayInputStream => BAIS, ByteArrayOutputStream => BAOS}
+
 import org.scalatest._
-import org.scalatest.matchers.ShouldMatchers
 
-import java.io.{ByteArrayOutputStream => BAOS, ByteArrayInputStream => BAIS}
-
-import JZlib._
-
-class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with ShouldMatchers {
+class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Matchers {
 
   before {
   }
@@ -16,16 +13,16 @@ class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Shoul
   after {
   }
 
-  behavior of "Deflter and Inflater"
+  behavior of "Deflater and Inflater"
 
-  it can "deflate and infate data one by one." in {
+  it can "deflate and inflate data one by one." in {
     val data1 = randombuf(1024)
-    implicit val buf = new Array[Byte](1)
+    implicit val buf: Array[Byte] = new Array[Byte](1)
 
     val baos = new BAOS
     val gos = new DeflaterOutputStream(baos)
     data1 -> gos
-    gos.close
+    gos.close()
 
     val baos2 = new BAOS
     new InflaterInputStream(new BAIS(baos.toByteArray)) -> baos2
@@ -35,20 +32,20 @@ class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Shoul
     data2 should equal (data1)
   }
 
-  behavior of "DeflterOutputStream and InflaterInputStream"
+  behavior of "DeflaterOutputStream and InflaterInputStream"
 
-  it can "deflate and infate." in {
+  it can "deflate and inflate." in {
 
     (1 to 100 by 3).foreach { i =>
 
-      implicit val buf = new Array[Byte](i)
+      implicit val buf: Array[Byte] = new Array[Byte](i)
 
       val data1 = randombuf(10240)
 
       val baos = new BAOS
       val gos = new DeflaterOutputStream(baos)
       data1 -> gos
-      gos.close
+      gos.close()
 
       val baos2 = new BAOS
       new InflaterInputStream(new BAIS(baos.toByteArray)) -> baos2
@@ -59,13 +56,13 @@ class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Shoul
     }
   }
 
-  behavior of "Deflter and Inflater"
+  behavior of "Deflater and Inflater"
 
-  it can "deflate and infate nowrap data." in {
+  it can "deflate and inflate nowrap data." in {
 
     (1 to 100 by 3).foreach { i =>
 
-      implicit val buf = new Array[Byte](i)
+      implicit val buf: Array[Byte] = new Array[Byte](i)
 
       val data1 = randombuf(10240)
 
@@ -75,7 +72,7 @@ class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Shoul
                                  true)
       val gos = new DeflaterOutputStream(baos, deflater)
       data1 -> gos
-      gos.close
+      gos.close()
 
       val baos2 = new BAOS
       val inflater = new Inflater(JZlib.DEF_WBITS, true)
@@ -87,8 +84,8 @@ class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Shoul
     }
   }
 
-  it can "deflate and infate nowrap data with MAX_WBITS." in {
-    implicit val buf = new Array[Byte](100)
+  it can "deflate and inflate nowrap data with MAX_WBITS." in {
+    implicit val buf: Array[Byte] = new Array[Byte](100)
 
     List(randombuf(10240),
          """{"color":2,"id":"EvLd4UG.CXjnk35o1e8LrYYQfHu0h.d*SqVJPoqmzXM::Ly::Snaps::Store::Commit"}""".getBytes) foreach { data1 =>
@@ -102,7 +99,7 @@ class DeflaterInflaterStreamTest extends FlatSpec with BeforeAndAfter with Shoul
       val baos = new BAOS
       val gos = new DeflaterOutputStream(baos, deflater)
       data1 -> gos
-      gos.close
+      gos.close()
 
       val baos2 = new BAOS
       new InflaterInputStream(new BAIS(baos.toByteArray), inflater) -> baos2

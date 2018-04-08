@@ -59,6 +59,8 @@ final public class Deflater extends ZStream {
 
   private boolean finished = false;
 
+  Deflate dstate;
+
   public Deflater() {
     super();
   }
@@ -140,14 +142,17 @@ final public class Deflater extends ZStream {
       return Z_STREAM_ERROR;
     }
     int ret = dstate.deflate(flush);
-    if (ret == Z_STREAM_END)
+    if (ret == Z_STREAM_END) {
       finished = true;
+    }
     return ret;
   }
 
   public int end() {
     finished = true;
-    if (dstate == null) return Z_STREAM_ERROR;
+    if (dstate == null) {
+      return Z_STREAM_ERROR;
+    }
     int ret = dstate.deflateEnd();
     dstate = null;
     free();
@@ -155,13 +160,16 @@ final public class Deflater extends ZStream {
   }
 
   public int params(int level, int strategy) {
-    if (dstate == null) return Z_STREAM_ERROR;
+    if (dstate == null) {
+      return Z_STREAM_ERROR;
+    }
     return dstate.deflateParams(level, strategy);
   }
 
   public int setDictionary(byte[] dictionary, int dictLength) {
-    if (dstate == null)
+    if (dstate == null) {
       return Z_STREAM_ERROR;
+    }
     return dstate.deflateSetDictionary(dictionary, dictLength);
   }
 
@@ -172,5 +180,123 @@ final public class Deflater extends ZStream {
   public int copy(Deflater src) {
     this.finished = src.finished;
     return Deflate.deflateCopy(this, src);
+  }
+
+  public int deflateInit(int level) {
+    return deflateInit(level, MAX_WBITS);
+  }
+
+  public int deflateInit(int level, boolean nowrap) {
+    return deflateInit(level, MAX_WBITS, nowrap);
+  }
+
+  public int deflateInit(int level, int bits) {
+    return deflateInit(level, bits, false);
+  }
+
+  public int deflateInit(int level, int bits, int memlevel,
+                         JZlib.WrapperType wrapperType) {
+    if (bits < 9 || bits > 15) {
+      return Z_STREAM_ERROR;
+    }
+    if (wrapperType == JZlib.W_NONE) {
+      bits *= -1;
+    } else if (wrapperType == JZlib.W_GZIP) {
+      bits += 16;
+    } else if (wrapperType == JZlib.W_ANY) {
+      return Z_STREAM_ERROR;
+    } else if (wrapperType == JZlib.W_ZLIB) {
+    }
+    return this.deflateInit(level, bits, memlevel);
+  }
+
+  public int deflateInit(int level, int bits, int memlevel) {
+    dstate = new Deflate(this);
+    return dstate.deflateInit(level, bits, memlevel);
+  }
+
+  public int deflateInit(int level, int bits, boolean nowrap) {
+    dstate = new Deflate(this);
+    return dstate.deflateInit(level, nowrap ? -bits : bits);
+  }
+
+
+
+  public int deflateEnd() {
+    if (dstate == null)
+      return Z_STREAM_ERROR;
+    int ret = dstate.deflateEnd();
+    dstate = null;
+    return ret;
+  }
+
+  public int deflateParams(int level, int strategy) {
+    if (dstate == null)
+      return Z_STREAM_ERROR;
+    return dstate.deflateParams(level, strategy);
+  }
+
+  public int deflateSetDictionary(byte[] dictionary, int dictLength) {
+    if (dstate == null)
+      return Z_STREAM_ERROR;
+    return dstate.deflateSetDictionary(dictionary, dictLength);
+  }
+
+  // Flush as much pending output as possible. All deflate() output goes
+  // through this function so some applications may wish to modify it
+  // to avoid allocating a large strm->next_out buffer and copying into it.
+  // (See also read_buf()).
+  void flush_pending() {
+    int len = dstate.pending;
+
+    if (len > avail_out)
+      len = avail_out;
+    if (len == 0)
+      return;
+
+    if (dstate.pending_buf.length <= dstate.pending_out
+      || next_out.length <= next_out_index
+      || dstate.pending_buf.length < (dstate.pending_out + len)
+      || next_out.length < (next_out_index + len)) {
+      // System.out.println(dstate.pending_buf.length+", "+dstate.pending_out+
+      // ", "+next_out.length+", "+next_out_index+", "+len);
+      // System.out.println("avail_out="+avail_out);
+    }
+
+    System.arraycopy(dstate.pending_buf, dstate.pending_out, next_out,
+      next_out_index, len);
+
+    next_out_index += len;
+    dstate.pending_out += len;
+    total_out += len;
+    avail_out -= len;
+    dstate.pending -= len;
+    if (dstate.pending == 0) {
+      dstate.pending_out = 0;
+    }
+  }
+
+  // Read a new buffer from the current input stream, update the adler32
+  // and total number of bytes read. All deflate() input goes through
+  // this function so some applications may wish to modify it to avoid
+  // allocating a large strm->next_in buffer and copying from it.
+  // (See also flush_pending()).
+  int read_buf(byte[] buf, int start, int size) {
+    int len = avail_in;
+
+    if (len > size)
+      len = size;
+    if (len == 0)
+      return 0;
+
+    avail_in -= len;
+
+    if (dstate.wrap != 0) {
+      adler.update(next_in, next_in_index, len);
+    }
+    System.arraycopy(next_in, next_in_index, buf, start, len);
+    next_in_index += len;
+    total_in += len;
+    return len;
   }
 }

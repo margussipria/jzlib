@@ -61,6 +61,7 @@ final public class Adler32 implements Checksum {
   public void update(byte[] buf, int index, int len) {
 
     if (len == 1) {
+      //noinspection UnusedAssignment
       s1 += buf[index++] & 0xff;
       s2 += s1;
       s1 %= BASE;
@@ -101,42 +102,24 @@ final public class Adler32 implements Checksum {
   // The following logic has come from zlib.1.2.
   static long combine(long adler1, long adler2, long len2) {
     long BASEL = (long) BASE;
-    long sum1;
-    long sum2;
-    long rem;  // unsigned int
+    long rem = len2 % BASEL;
+    long sum1 = adler1 & 0xffffL;
+    long sum2 = (rem * sum1) % BASEL;
 
-    rem = len2 % BASEL;
-    sum1 = adler1 & 0xffffL;
-    sum2 = rem * sum1;
-    sum2 %= BASEL; // MOD(sum2);
     sum1 += (adler2 & 0xffffL) + BASEL - 1;
     sum2 += ((adler1 >> 16) & 0xffffL) + ((adler2 >> 16) & 0xffffL) + BASEL - rem;
-    if (sum1 >= BASEL) sum1 -= BASEL;
-    if (sum1 >= BASEL) sum1 -= BASEL;
-    if (sum2 >= (BASEL << 1)) sum2 -= (BASEL << 1);
-    if (sum2 >= BASEL) sum2 -= BASEL;
+    if (sum1 >= BASEL) {
+      sum1 -= BASEL;
+    }
+    if (sum1 >= BASEL) {
+      sum1 -= BASEL;
+    }
+    if (sum2 >= (BASEL << 1)) {
+      sum2 -= (BASEL << 1);
+    }
+    if (sum2 >= BASEL) {
+      sum2 -= BASEL;
+    }
     return sum1 | (sum2 << 16);
   }
-
-/*
-  private java.util.zip.Adler32 adler=new java.util.zip.Adler32();
-  public void update(byte[] buf, int index, int len){
-    if(buf==null) {adler.reset();}
-    else{adler.update(buf, index, len);}
-  }
-  public void reset(){
-    adler.reset();
-  }
-  public void reset(long init){
-    if(init==1L){
-      adler.reset();
-    }
-    else{
-      System.err.println("unsupported operation");
-    }
-  }
-  public long getValue(){
-    return adler.getValue();
-  }
-*/
 }

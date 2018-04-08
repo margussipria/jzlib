@@ -61,6 +61,8 @@ final public class Inflater extends ZStream {
   private JZlib.WrapperType param_wrapperType = null;
   private boolean param_nowrap = false;
 
+  Inflate istate;
+
   public Inflater() {
     super();
     init();
@@ -143,40 +145,112 @@ final public class Inflater extends ZStream {
   }
 
   public int inflate(int f) {
-    if (istate == null) return Z_STREAM_ERROR;
+    if (istate == null) {
+      return Z_STREAM_ERROR;
+    }
     int ret = istate.inflate(f);
-    if (ret == Z_STREAM_END)
+    if (ret == Z_STREAM_END) {
       finished = true;
+    }
     return ret;
   }
 
   public int end() {
     finished = true;
-    if (istate == null) return Z_STREAM_ERROR;
-    int ret = istate.inflateEnd();
-//    istate = null;
-    return ret;
+    if (istate == null) {
+      return Z_STREAM_ERROR;
+    }
+    return istate.inflateEnd();
   }
 
   public int sync() {
-    if (istate == null)
+    if (istate == null) {
       return Z_STREAM_ERROR;
+    }
     return istate.inflateSync();
   }
 
   public int syncPoint() {
-    if (istate == null)
+    if (istate == null) {
       return Z_STREAM_ERROR;
+    }
     return istate.inflateSyncPoint();
   }
 
   public int setDictionary(byte[] dictionary, int dictLength) {
-    if (istate == null)
+    if (istate == null) {
       return Z_STREAM_ERROR;
+    }
     return istate.inflateSetDictionary(dictionary, dictLength);
   }
 
   public boolean finished() {
     return istate.mode == 12 /*DONE*/;
+  }
+
+  public int inflateInit() {
+    return inflateInit(DEF_WBITS);
+  }
+
+  public int inflateInit(boolean nowrap) {
+    return inflateInit(DEF_WBITS, nowrap);
+  }
+
+  public int inflateInit(int w) {
+    return inflateInit(w, false);
+  }
+
+  public int inflateInit(JZlib.WrapperType wrapperType) {
+    return inflateInit(DEF_WBITS, wrapperType);
+  }
+
+  public int inflateInit(int w, JZlib.WrapperType wrapperType) {
+    boolean nowrap = false;
+    if (wrapperType == JZlib.W_NONE) {
+      nowrap = true;
+    } else if (wrapperType == JZlib.W_GZIP) {
+      w += 16;
+    } else if (wrapperType == JZlib.W_ANY) {
+      w |= Inflate.INFLATE_ANY;
+    } else if (wrapperType == JZlib.W_ZLIB) {
+    }
+    return inflateInit(w, nowrap);
+  }
+
+
+
+  public int inflateInit(int w, boolean nowrap) {
+    istate = new Inflate(this);
+    return istate.inflateInit(nowrap ? -w : w);
+  }
+
+  public int inflateEnd() {
+    if (istate == null)
+      return Z_STREAM_ERROR;
+    int ret = istate.inflateEnd();
+    // istate = null;
+    return ret;
+  }
+
+  public int inflateSync() {
+    if (istate == null)
+      return Z_STREAM_ERROR;
+    return istate.inflateSync();
+  }
+
+  public int inflateSyncPoint() {
+    if (istate == null)
+      return Z_STREAM_ERROR;
+    return istate.inflateSyncPoint();
+  }
+
+  public int inflateSetDictionary(byte[] dictionary, int dictLength) {
+    if (istate == null)
+      return Z_STREAM_ERROR;
+    return istate.inflateSetDictionary(dictionary, dictLength);
+  }
+
+  public boolean inflateFinished() {
+    return istate.mode == 12 /* DONE */;
   }
 }

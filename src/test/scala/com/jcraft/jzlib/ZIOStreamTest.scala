@@ -1,7 +1,7 @@
 /* -*-mode:scala; c-basic-offset:2; indent-tabs-mode:nil -*- */
 package com.jcraft.jzlib
 
-import java.io.{ByteArrayInputStream => BAIS, ByteArrayOutputStream => BAOS, ObjectInputStream => OIS, ObjectOutputStream => OOS}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, ObjectInputStream => OIS, ObjectOutputStream => OOS}
 
 import com.jcraft.jzlib.JZlib._
 import org.scalatest._
@@ -14,25 +14,25 @@ class ZIOStreamTest extends FlatSpec with BeforeAndAfter with Matchers {
   after {
   }
 
-  behavior of "ZOutputStream and ZInputStream"
+  behavior of "DeflaterOutputStream and InflaterInputStream"
 
   it can "deflate and inflate data." in {
     val hello = "Hello World!"
 
-    val out = new BAOS()
-    val zOut = new ZOutputStream(out, Z_BEST_COMPRESSION)
-    val objOut = new OOS(zOut)
-    objOut.writeObject(hello)
-    zOut.close()
+    val byteArrayOutputStream = new ByteArrayOutputStream()
+    val deflaterOutputStream = new DeflaterOutputStream(byteArrayOutputStream)
+    val objectOutputStream = new OOS(deflaterOutputStream)
+    objectOutputStream.writeObject(hello)
+    deflaterOutputStream.close()
 
-    val in = new BAIS(out.toByteArray)
-    val zIn = new ZInputStream(in)
-    val objIn = new OIS(zIn)
+    val byteArrayInputStream = new ByteArrayInputStream(byteArrayOutputStream.toByteArray)
+    val inflaterInputStream = new InflaterInputStream(byteArrayInputStream)
+    val objectInputStream = new OIS(inflaterInputStream)
 
-    objIn.readObject.toString should equal (hello)
+    objectInputStream.readObject.toString should equal (hello)
   }
 
-  behavior of "ZOutputStream and ZInputStream"
+  behavior of "DeflaterOutputStream and InflaterInputStream"
 
   it can "support nowrap data." in {
 
@@ -40,14 +40,16 @@ class ZIOStreamTest extends FlatSpec with BeforeAndAfter with Matchers {
 
     val hello = "Hello World!".getBytes
 
-    val baos = new BAOS
-    val zos = new ZOutputStream(baos, Z_DEFAULT_COMPRESSION, true)
-    hello -> zos
-    zos.close()
+    val deflater = new Deflater(Z_DEFAULT_COMPRESSION, true)
 
-    val baos2 = new BAOS
-    val zis = new ZInputStream(new BAIS(baos.toByteArray), true)
-    zis -> baos2
+    val byteArrayOutputStream = new ByteArrayOutputStream
+    val deflaterOutputStream = new DeflaterOutputStream(byteArrayOutputStream, deflater)
+    hello -> deflaterOutputStream
+    deflaterOutputStream.close()
+
+    val baos2 = new ByteArrayOutputStream
+    val inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(byteArrayOutputStream.toByteArray), true)
+    inflaterInputStream -> baos2
     val data2 = baos2.toByteArray
 
     data2.length should equal (hello.length)

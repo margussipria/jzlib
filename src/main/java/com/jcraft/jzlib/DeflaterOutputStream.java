@@ -62,16 +62,11 @@ public class DeflaterOutputStream extends FilterOutputStream {
     this(out, def, DEFAULT_BUFSIZE, true);
   }
 
-  public DeflaterOutputStream(OutputStream out,
-                              Deflater deflater,
-                              int size) throws IOException {
+  public DeflaterOutputStream(OutputStream out, Deflater deflater, int size) throws IOException {
     this(out, deflater, size, true);
   }
 
-  public DeflaterOutputStream(OutputStream out,
-                              Deflater deflater,
-                              int size,
-                              boolean close_out) throws IOException {
+  public DeflaterOutputStream(OutputStream out, Deflater deflater, int size, boolean close_out) throws IOException {
     super(out);
     if (out == null || deflater == null) {
       throw new NullPointerException();

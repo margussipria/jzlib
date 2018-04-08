@@ -105,15 +105,15 @@ final class InfBlocks {
 
   private final InfTree inftree = new InfTree();
 
-  private final ZStream z;
+  private final Inflater z;
 
-  InfBlocks(ZStream z, int w) {
+  InfBlocks(Inflater z, int w) {
     this.z = z;
     this.codes = new InfCodes(this.z, this);
     hufts = new int[MANY * 3];
     window = new byte[w];
     end = w;
-    this.check = (z.istate.wrap == 0) ? false : true;
+    this.check = z.istate.wrap != 0;
     mode = TYPE;
     reset();
   }

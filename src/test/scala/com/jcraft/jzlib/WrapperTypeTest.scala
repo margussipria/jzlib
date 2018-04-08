@@ -73,7 +73,7 @@ class WrapperTypeTest extends FlatSpec with BeforeAndAfter with Matchers {
 
   it can "detect data type of input." in {
     cases foreach { case (iflag, (good, bad)) => 
-      val deflater = new ZStream
+      val deflater = new Deflater
 
       err = deflater.deflateInit(Z_BEST_SPEED, DEF_WBITS, 9, iflag)
       err should equal (Z_OK)
@@ -147,8 +147,7 @@ class WrapperTypeTest extends FlatSpec with BeforeAndAfter with Matchers {
     new String(uncompr, 0, total_out) should equal (new String(data))
   }
 
-  private def deflate(deflater: ZStream,
-                      data: Array[Byte], compr: Array[Byte]) = {
+  private def deflate(deflater: Deflater, data: Array[Byte], compr: Array[Byte]) = {
     deflater.setInput(data)
     deflater.setOutput(compr)
 
@@ -162,7 +161,7 @@ class WrapperTypeTest extends FlatSpec with BeforeAndAfter with Matchers {
   private def inflate(compr: Array[Byte],
                       uncompr: Array[Byte],
                       w: WrapperType) = {
-    val inflater = new ZStream
+    val inflater = new Inflater
     err = inflater.inflateInit(w)
     err should equal (Z_OK)
 
@@ -182,7 +181,7 @@ class WrapperTypeTest extends FlatSpec with BeforeAndAfter with Matchers {
   }
 
   private def inflate_fail(compr: Array[Byte], uncompr: Array[Byte], w: WrapperType): Unit = {
-    val inflater = new ZStream
+    val inflater = new Inflater
 
     err = inflater.inflateInit(w)
     err should equal (Z_OK)

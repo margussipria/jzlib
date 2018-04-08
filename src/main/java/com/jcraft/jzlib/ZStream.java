@@ -78,8 +78,6 @@ public class ZStream {
   Deflate dstate;
   Inflate istate;
 
-  int data_type; // best guess about the data type: ascii or binary
-
   Checksum adler;
 
   public ZStream() {

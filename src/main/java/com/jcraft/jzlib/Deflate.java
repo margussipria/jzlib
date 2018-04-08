@@ -1417,7 +1417,6 @@ public final class Deflate implements Cloneable {
   int deflateReset() {
     strm.total_in = strm.total_out = 0;
     strm.msg = null; //
-    strm.data_type = Z_UNKNOWN;
 
     pending = 0;
     pending_out = 0;
@@ -1698,7 +1697,6 @@ public final class Deflate implements Cloneable {
     dest.total_out = src.total_out;
 
     dest.msg = src.msg;
-    dest.data_type = src.data_type;
     dest.adler = src.adler.copy();
 
     try {
